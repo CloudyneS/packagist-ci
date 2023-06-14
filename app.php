@@ -23,11 +23,10 @@ echo "Successfully uploaded package!" . PHP_EOL;
 
 try {
     echo "Checking if the package already exists..." . PHP_EOL;
-    $client->packages()->show($packageName);
-    
-    $log['artifactIDs'] = $client->packages()->artifacts()->showPackageArtifacts($packageName);
+    $test = $client->packages()->show($packageName);
 
     echo "Package exists, trying to add artifact...";
+    $log['artifactIDs'] = $client->packages()->artifacts()->showPackageArtifacts($packageName);
     $idList = $log['artifactIDs'];
 
     if (substr($packageVersion, 0, 3) === 'dev') {
