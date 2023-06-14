@@ -1,5 +1,12 @@
 FROM php:8.0-cli-alpine
 
+LABEL Version="1.0"
+LABEL Maintainer="Cloudyne Systems"
+LABEL org.opencontainers.image.source="https://github.com/cloudynes/packagist-ci"
+LABEL Description="Container for uploading artifacts to packagist.org/private packagist"
+LABEL org.opencontainers.image.description="Container for uploading artifacts to packagist.org/private packagist"
+LABEL org.opencontainers.image.licenses="MIT"
+
 WORKDIR /app
 
 ADD . /app
