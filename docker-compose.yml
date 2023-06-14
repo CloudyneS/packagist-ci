@@ -1,0 +1,15 @@
+version: "3.2"
+services:
+  uploader:
+    image: ghcr.io/cloudynes/php-packagist-ci:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command:
+      - php
+      - app.php
+    env_file:
+      - .env
+    volumes:
+      - ./package.zip:/app/package.zip
+      - ./app.php:/app/app.php

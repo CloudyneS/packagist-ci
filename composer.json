@@ -1,0 +1,12 @@
+{
+    "name": "cloudyne/packagist-uploader",
+    "version": "dev-main",
+    "description": "Checking to see if the description changes",
+    "require": {
+        "php": ">=8",
+        "ext-json": "*",
+        "ext-curl": "*",
+        "private-packagist/api-client": "^1",
+        "php-http/guzzle7-adapter": "^1"
+    }
+}
