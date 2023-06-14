@@ -9,7 +9,7 @@ RUN apk update \
     && docker-php-ext-install zip \
     && docker-php-source delete \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    && composer install --no-dev --no-interaction
+    && composer install --no-dev --no-interaction \
     && echo 'memory_limit = 2048M' >> /usr/local/etc/php/conf.d/docker-php-memlimit.ini;
 
 CMD ["php", "app.php"]
