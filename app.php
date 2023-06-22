@@ -42,8 +42,9 @@ try {
         $log['addArtifact'] = $client->packages()->editArtifactPackage($packageName, $idList);
     }
     catch (PrivatePackagist\ApiClient\Exception\ErrorException $e) {
+        print_r($e);
         throw new Exception(
-            'Package version already exists and is not a development version. Upload failed.' 
+            'Package version already exists and is not a development version. Upload failed.'
         );
 
     }
