@@ -37,12 +37,13 @@ try {
 
     $idList = array_column($idList, 'id');
     $idList[] = $log['pkgUpload']['id'];
+    echo "IDList: " . implode(", ", $idList).PHP_EOL;
 
     try {
         $log['addArtifact'] = $client->packages()->editArtifactPackage($packageName, $idList);
     }
     catch (PrivatePackagist\ApiClient\Exception\ErrorException $e) {
-        print_r($e);
+        print_r($log['addArtifact']);
         throw new Exception(
             'Package version already exists and is not a development version. Upload failed.'
         );
