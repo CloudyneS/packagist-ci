@@ -36,11 +36,13 @@ try {
     }
 
     $idList = array_column($idList, 'id');
+    
     $idList[] = $log['pkgUpload']['id'];
     echo "IDList: " . implode(", ", $idList).PHP_EOL;
 
+    # Replace artifacts entirely
     try {
-        $log['addArtifact'] = $client->packages()->editArtifactPackage($packageName, $idList);
+        $log['addArtifact'] = $client->packages()->editArtifactPackage($packageName, [$log['pkgUpload']['id']]);
     }
     catch (PrivatePackagist\ApiClient\Exception\ErrorException $e) {
         print_r($log['addArtifact']);
