@@ -1,11 +1,26 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
 
-$api_key = $_SERVER['CMP_API_KEY'];
-$api_token = $_SERVER['CMP_API_SECRET'];
-$packageName = $_SERVER['CMP_PACKAGE_NAME'];
-$packageVersion = $_SERVER['CMP_PACKAGE_VERSION'];
-$packagePath = $_SERVER['CMP_PACKAGE_PATH'];
+$cfg = $_SERVER;
+
+if (!isset($_SERVER) || !isset($_SERVER['CMP_API_KEY'])) {
+    if (isset($_ENV) && isset($_ENV['CMP_API_KEY'])) {
+        $cfg = $_ENV;
+    } else if (file_exists('.env')) {
+        $cfg = parse_ini_file(".env");
+        if ($cfg === false || !is_array($cfg) || !isset($cfg['CMP_API_KEY'])) {
+            throw new Exception("No configuration found in .env file");
+        }
+    } else {
+        throw new Exception("No configuration found");
+    }
+}
+
+$api_key = $cfg['CMP_API_KEY'];
+$api_token = $cfg['CMP_API_SECRET'];
+$packageName = $cfg['CMP_PACKAGE_NAME'];
+$packageVersion = $cfg['CMP_PACKAGE_VERSION'];
+$packagePath = $cfg['CMP_PACKAGE_PATH'];
 
 $zipfileName = str_replace('/', '-', $packageName) . '.zip';
 
@@ -42,7 +57,7 @@ try {
 
     # Replace artifacts entirely
     try {
-        $log['addArtifact'] = $client->packages()->editArtifactPackage($packageName, [$log['pkgUpload']['id']]);
+        $log['addArtifact'] = $client->packages()->editArtifactPackage($packageName, $idList);
     }
     catch (PrivatePackagist\ApiClient\Exception\ErrorException $e) {
         print_r($log['addArtifact']);

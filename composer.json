@@ -1,5 +1,5 @@
 {
-    "name": "cloudyne/packagist-uploader",
+    "name": "cloudyne/packagist-ci",
     "version": "dev-main",
     "description": "Checking to see if the description changes",
     "require": {
@@ -8,5 +8,10 @@
         "ext-curl": "*",
         "private-packagist/api-client": "^1",
         "php-http/guzzle7-adapter": "^1"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     }
 }
