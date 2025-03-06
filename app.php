@@ -48,6 +48,7 @@ try {
     $log['existingPackage'] = $client->packages()->show($packageName);
 } catch (PrivatePackagist\ApiClient\Exception\ResourceNotFoundException $e) {
     echo "Package does not exist, creating..." . PHP_EOL;
+    echo "(Err: " . $e->getMessage() . ")" . PHP_EOL;
     $log['pkgCreate'] = $client->packages()->createArtifactPackage([$log['pkgUpload']['id']]);
     echo "Successfully created package!" . PHP_EOL;
 
