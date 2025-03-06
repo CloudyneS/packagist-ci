@@ -28,6 +28,12 @@ echo "Package name: {$packageName}" . PHP_EOL;
 echo "Package version: {$packageVersion}" . PHP_EOL;
 echo "Package path: {$packagePath}" . PHP_EOL;
 
+if (!str_starts_with($packageVersion, 'dev-')) {
+    if (count(explode('.', $packageVersion)) < 2) {
+        $packageVersion = 'dev-' . $packageVersion;
+    }
+}
+
 $log = [];
 
 $log['zipfileName'] = str_replace('/', '-', $packageName) . '.zip';
@@ -63,24 +69,27 @@ try {
 }
 
 echo "Package {$log['existingPackage']['name']} exists, checking versions" . PHP_EOL;
-
-$log['packageArtifacts'] = $client->packages()->artifacts()->showPackageArtifacts($packageName);
-$log['listOfArtifactIds'] = array_filter($log['packageArtifacts'], function ($item) use ($packageVersion) {
-    return $item['composerJson']['version'] !== $packageVersion;
-});
-
-$log['listOfArtifactIds'] = array_column($log['listOfArtifactIds'], 'id');
-
-$log['listOfArtifactIds'][] = $log['newArtifact']['id'];
-
-$client->packages()->editArtifactPackage($packageName, $log['listOfArtifactIds']);
-
-echo "Successfully updated package!" . PHP_EOL;
-echo "Available versions now:" . PHP_EOL;
-
-$log['newPackageArtifacts'] = $client->packages()->artifacts()->showPackageArtifacts($packageName);
-foreach ($log['newPackageArtifacts'] as $item) {
-    echo $item['composerJson']['version'] . PHP_EOL;
+try {
+    $log['packageArtifacts'] = $client->packages()->artifacts()->showPackageArtifacts($packageName);
+    $log['listOfArtifactIds'] = array_filter($log['packageArtifacts'], function ($item) use ($packageVersion) {
+        return $item['composerJson']['version'] !== $packageVersion;
+    });
+    
+    $log['listOfArtifactIds'] = array_column($log['listOfArtifactIds'], 'id');
+    
+    $log['listOfArtifactIds'][] = $log['newArtifact']['id'];
+    
+    $client->packages()->editArtifactPackage($packageName, $log['listOfArtifactIds']);
+    
+    echo "Successfully updated package!" . PHP_EOL;
+    echo "Available versions now:" . PHP_EOL;
+    
+    $log['newPackageArtifacts'] = $client->packages()->artifacts()->showPackageArtifacts($packageName);
+    foreach ($log['newPackageArtifacts'] as $item) {
+        echo $item['composerJson']['version'] . PHP_EOL;
+    }
+} catch (PrivatePackagist\ApiClient\Exception\ResourceNotFoundException $e) {
+    echo "An error occurred while fetching package artifacts: " . $e->getMessage() . PHP_EOL;
 }
 
 print_r($log);
