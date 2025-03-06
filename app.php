@@ -35,40 +35,48 @@ $client->authenticate($api_key, $api_token);
 echo "Reading file {$packagePath}..." . PHP_EOL;
 $file = file_get_contents($packagePath);
 
+if ($file === false || $file === null) {
+    echo "Failed to read file {$packagePath}" . PHP_EOL;
+    return;
+}
+
 echo "Uploading package artifact..." . PHP_EOL;
 $log['newArtifact'] = $client->packages()->artifacts()->create($file, 'application/zip', $log['zipfileName']);
 
 echo "Checking if the package already exists..." . PHP_EOL;
 try {
     $log['existingPackage'] = $client->packages()->show($packageName);
-
-    echo "Package {$log['existingPackage']['name']} exists, checking versions" . PHP_EOL;
-
-    $log['packageArtifacts'] = $client->packages()->artifacts()->showPackageArtifacts($packageName);
-    $log['listOfArtifactIds'] = array_filter($log['packageArtifacts'], function($item) use ($packageVersion) {
-        return $item['composerJson']['version'] !== $packageVersion;
-    });
-
-    $log['listOfArtifactIds'] = array_column($log['listOfArtifactIds'], 'id');
-
-    $log['listOfArtifactIds'][] = $log['newArtifact']['id'];
-
-    $client->packages()->editArtifactPackage($packageName, $log['listOfArtifactIds']);
-    
-    echo "Successfully updated package!" . PHP_EOL;
-    echo "Available versions now:" . PHP_EOL;
-
-    $log['newPackageArtifacts'] = $client->packages()->artifacts()->showPackageArtifacts($packageName);
-    foreach ($log['newPackageArtifacts'] as $item) {
-        echo $item['composerJson']['version'] . PHP_EOL;
-    }
-}
-catch (PrivatePackagist\ApiClient\Exception\ResourceNotFoundException $e) {
+} catch (PrivatePackagist\ApiClient\Exception\ResourceNotFoundException $e) {
     echo "Package does not exist, creating..." . PHP_EOL;
     $log['pkgCreate'] = $client->packages()->createArtifactPackage([$log['pkgUpload']['id']]);
     echo "Successfully created package!" . PHP_EOL;
+
+    print_r($log);
+
+    echo "All done!" . PHP_EOL;
+    return;
 }
 
+echo "Package {$log['existingPackage']['name']} exists, checking versions" . PHP_EOL;
+
+$log['packageArtifacts'] = $client->packages()->artifacts()->showPackageArtifacts($packageName);
+$log['listOfArtifactIds'] = array_filter($log['packageArtifacts'], function ($item) use ($packageVersion) {
+    return $item['composerJson']['version'] !== $packageVersion;
+});
+
+$log['listOfArtifactIds'] = array_column($log['listOfArtifactIds'], 'id');
+
+$log['listOfArtifactIds'][] = $log['newArtifact']['id'];
+
+$client->packages()->editArtifactPackage($packageName, $log['listOfArtifactIds']);
+
+echo "Successfully updated package!" . PHP_EOL;
+echo "Available versions now:" . PHP_EOL;
+
+$log['newPackageArtifacts'] = $client->packages()->artifacts()->showPackageArtifacts($packageName);
+foreach ($log['newPackageArtifacts'] as $item) {
+    echo $item['composerJson']['version'] . PHP_EOL;
+}
 
 print_r($log);
 
