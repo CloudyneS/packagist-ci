@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
 
+echo 'Running version 0.1.2' . PHP_EOL;
+
 $cfg = $_SERVER;
 
 if (!isset($_SERVER) || !isset($_SERVER['CMP_API_KEY'])) {
