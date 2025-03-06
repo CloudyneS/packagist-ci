@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
 
-echo 'Running version 0.1.4' . PHP_EOL;
+echo 'Running version 0.1.5' . PHP_EOL;
 
 $cfg = $_SERVER;
 
@@ -53,7 +53,7 @@ try {
 } catch (PrivatePackagist\ApiClient\Exception\ResourceNotFoundException $e) {
     echo "Package does not exist, creating..." . PHP_EOL;
     echo "(Err: " . $e->getMessage() . ")" . PHP_EOL;
-    $log['pkgCreate'] = $client->packages()->createArtifactPackage([$log['pkgUpload']['id']]);
+    $log['pkgCreate'] = $client->packages()->createArtifactPackage([$log['newArtifact']['id']]);
     echo "Successfully created package!" . PHP_EOL;
 
     print_r($log);
