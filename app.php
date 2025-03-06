@@ -22,56 +22,52 @@ $packageName = $cfg['CMP_PACKAGE_NAME'];
 $packageVersion = $cfg['CMP_PACKAGE_VERSION'];
 $packagePath = $cfg['CMP_PACKAGE_PATH'];
 
-$zipfileName = str_replace('/', '-', $packageName) . '.zip';
+$log = [];
+
+$log['zipfileName'] = str_replace('/', '-', $packageName) . '.zip';
 
 echo "Creating client..." . PHP_EOL;
 $client = new \PrivatePackagist\ApiClient\Client();
 $client->authenticate($api_key, $api_token);
 
-echo "Reading file..." . PHP_EOL;
+echo "Reading file {$packagePath}..." . PHP_EOL;
 $file = file_get_contents($packagePath);
-$log = [];
 
 echo "Uploading package artifact..." . PHP_EOL;
-$log['pkgUpload'] = $client->packages()->artifacts()->create($file, 'application/zip', $zipfileName);
-echo "Successfully uploaded package!" . PHP_EOL;
+$log['newArtifact'] = $client->packages()->artifacts()->create($file, 'application/zip', $log['zipfileName']);
 
+echo "Checking if the package already exists..." . PHP_EOL;
 try {
-    echo "Checking if the package already exists..." . PHP_EOL;
-    $test = $client->packages()->show($packageName);
+    $log['existingPackage'] = $client->packages()->show($packageName);
 
-    echo "Package exists, trying to add artifact...";
-    $log['artifactIDs'] = $client->packages()->artifacts()->showPackageArtifacts($packageName);
-    $idList = $log['artifactIDs'];
+    echo "Package {$log['existingPackage']['name']} exists, checking versions" . PHP_EOL;
 
-    if (substr($packageVersion, 0, 3) === 'dev') {
-        $idList = array_filter($idList, function($item) use ($packageVersion) {
-            return $item['version'] !== $packageVersion;
-        });
-    }
+    $log['packageArtifacts'] = $client->packages()->artifacts()->showPackageArtifacts($packageName);
+    $log['listOfArtifactIds'] = array_filter($log['packageArtifacts'], function($item) use ($packageVersion) {
+        return $item['composerJson']['version'] !== $packageVersion;
+    });
 
-    $idList = array_column($idList, 'id');
+    $log['listOfArtifactIds'] = array_column($log['listOfArtifactIds'], 'id');
+
+    $log['listOfArtifactIds'][] = $log['newArtifact']['id'];
+
+    $client->packages()->editArtifactPackage($packageName, $log['listOfArtifactIds']);
     
-    $idList[] = $log['pkgUpload']['id'];
-    echo "IDList: " . implode(", ", $idList).PHP_EOL;
+    echo "Successfully updated package!" . PHP_EOL;
+    echo "Available versions now:" . PHP_EOL;
 
-    # Replace artifacts entirely
-    try {
-        $log['addArtifact'] = $client->packages()->editArtifactPackage($packageName, $idList);
-    }
-    catch (PrivatePackagist\ApiClient\Exception\ErrorException $e) {
-        print_r($log['addArtifact']);
-        throw new Exception(
-            'Package version already exists and is not a development version. Upload failed.'
-        );
-
+    $log['newPackageArtifacts'] = $client->packages()->artifacts()->showPackageArtifacts($packageName);
+    foreach ($log['newPackageArtifacts'] as $item) {
+        echo $item['composerJson']['version'] . PHP_EOL;
     }
 }
 catch (PrivatePackagist\ApiClient\Exception\ResourceNotFoundException $e) {
-    echo "Creating package..." . PHP_EOL;
+    echo "Package does not exist, creating..." . PHP_EOL;
     $log['pkgCreate'] = $client->packages()->createArtifactPackage([$log['pkgUpload']['id']]);
     echo "Successfully created package!" . PHP_EOL;
 }
+
+
 print_r($log);
 
 echo "All done!" . PHP_EOL;
