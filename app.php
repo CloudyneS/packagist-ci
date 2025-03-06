@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
 
-echo 'Running version 0.1.2' . PHP_EOL;
+echo 'Running version 0.1.4' . PHP_EOL;
 
 $cfg = $_SERVER;
 
@@ -23,6 +23,10 @@ $api_token = $cfg['CMP_API_SECRET'];
 $packageName = $cfg['CMP_PACKAGE_NAME'];
 $packageVersion = $cfg['CMP_PACKAGE_VERSION'];
 $packagePath = $cfg['CMP_PACKAGE_PATH'];
+
+echo "Package name: {$packageName}" . PHP_EOL;
+echo "Package version: {$packageVersion}" . PHP_EOL;
+echo "Package path: {$packagePath}" . PHP_EOL;
 
 $log = [];
 
